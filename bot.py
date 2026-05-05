@@ -1,3 +1,5 @@
+print("BOT SCRIPT STARTED")
+
 import discord
 from discord.ext import commands
 
@@ -16,7 +18,7 @@ COPY_EMOJI_IDS = {
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    print(f"LOGGED IN AS {bot.user}")
 
 @bot.event
 async def on_raw_reaction_add(payload):
