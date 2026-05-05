@@ -8,7 +8,11 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-COPY_EMOJI = "1487653182644686941"
+COPY_EMOJI_IDS = {
+    1487653182644686941,
+    1500959260392161382,
+    935551452850577408,
+}
 
 @bot.event
 async def on_ready():
@@ -19,20 +23,17 @@ async def on_raw_reaction_add(payload):
     if payload.user_id == bot.user.id:
         return
 
-    if str(payload.emoji) != COPY_EMOJI:
+    # only trigger for allowed emojis
+    if payload.emoji.id not in COPY_EMOJI_IDS:
         return
 
-    guild = bot.get_guild(payload.guild_id)
     channel = bot.get_channel(payload.channel_id)
-
     if not channel:
         return
 
     message = await channel.fetch_message(payload.message_id)
 
-    user = guild.get_member(payload.user_id)
-    if not user:
-        user = await bot.fetch_user(payload.user_id)
+    user = await bot.fetch_user(payload.user_id)
 
     if not message.content and not message.attachments:
         return
@@ -41,13 +42,12 @@ async def on_raw_reaction_add(payload):
     if message.attachments:
         files = [await a.to_file() for a in message.attachments]
 
+    # ⭐ Option 1 behavior: reactor "appears" as the speaker
     await channel.send(
-        f"📋 {user.mention} copied a message from {message.author.mention}:\n{message.content}",
-        files=files
+        content=f"💬 **{user.display_name}**:\n{message.content}",
+        files=files,
+        allowed_mentions=discord.AllowedMentions.none()
     )
 
-@bot.event
-async def on_raw_reaction_add(payload):
-    print("REACTION DETECTED")
 import os
 bot.run(os.environ["TOKEN"])
