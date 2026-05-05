@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -23,31 +24,25 @@ async def on_raw_reaction_add(payload):
     if payload.user_id == bot.user.id:
         return
 
-    # only trigger for allowed emojis
     if payload.emoji.id not in COPY_EMOJI_IDS:
         return
 
-    channel = bot.get_channel(payload.channel_id)
-    if not channel:
-        return
+    channel = await bot.fetch_channel(payload.channel_id)
 
     message = await channel.fetch_message(payload.message_id)
 
-    user = await bot.fetch_user(payload.user_id)
+    user = payload.member or await bot.fetch_user(payload.user_id)
 
     if not message.content and not message.attachments:
         return
 
-    files = []
-    if message.attachments:
-        files = [await a.to_file() for a in message.attachments]
+    files = [await a.to_file() for a in message.attachments] if message.attachments else []
 
-    # ⭐ Option 1 behavior: reactor "appears" as the speaker
     await channel.send(
-        content=f"💬 **{user.display_name}**:\n{message.content}",
+        content=f"💬 **{user.name}**:\n{message.content}",
         files=files,
         allowed_mentions=discord.AllowedMentions.none()
     )
 
-import os
+print("BOT STARTING...")
 bot.run(os.environ["TOKEN"])
