@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -11,11 +10,9 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 COPY_EMOJI_IDS = {
     1487653182644686941,
-    1500959260392161382,
-    935551452850577408,
+    1500551597288325381,
+    1500959260392161382	  
 }
-
-recent = set()
 
 @bot.event
 async def on_ready():
@@ -26,36 +23,30 @@ async def on_raw_reaction_add(payload):
     if payload.user_id == bot.user.id:
         return
 
+    # only trigger for allowed emojis
     if payload.emoji.id not in COPY_EMOJI_IDS:
         return
 
-    # 🛑 duplicate protection
-    key = (payload.message_id, payload.user_id, payload.emoji.id)
-    if key in recent:
+    channel = bot.get_channel(payload.channel_id)
+    if not channel:
         return
-    recent.add(key)
 
-    if len(recent) > 1000:
-        recent.clear()
-
-    channel = await bot.fetch_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
 
-    guild = await bot.fetch_guild(payload.guild_id)
-    member = await guild.fetch_member(payload.user_id)
-
-    name = member.display_name
+    user = await bot.fetch_user(payload.user_id)
 
     if not message.content and not message.attachments:
         return
 
-    files = [await a.to_file() for a in message.attachments] if message.attachments else []
+    files = []
+    if message.attachments:
+        files = [await a.to_file() for a in message.attachments]
 
+    # ⭐ Option 1 behavior: reactor "appears" as the speaker
     await channel.send(
-        content=f"💬 **{name}**:\n{message.content}",
+        content=f"💬 **{user.display_name}**:\n{message.content}",
         files=files,
         allowed_mentions=discord.AllowedMentions.none()
     )
-
-print("BOT STARTING...")
+import os
 bot.run(os.environ["TOKEN"])
