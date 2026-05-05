@@ -1,5 +1,3 @@
-print("BOT SCRIPT STARTED")
-
 import discord
 from discord.ext import commands
 
@@ -13,12 +11,12 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 COPY_EMOJI_IDS = {
     1487653182644686941,
     1500551597288325381,
-    1500959260392161382	  
+    1500959260392161382
 }
 
 @bot.event
 async def on_ready():
-    print(f"LOGGED IN AS {bot.user}")
+    print(f"Logged in as {bot.user}")
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -50,5 +48,5 @@ async def on_raw_reaction_add(payload):
         files=files,
         allowed_mentions=discord.AllowedMentions.none()
     )
-import os
-bot.run(os.environ["TOKEN"])
+
+bot.run("YOUR_NEW_TOKEN_HERE")
