@@ -26,12 +26,15 @@ async def on_raw_reaction_add(payload):
 
     if payload.emoji.id not in COPY_EMOJI_IDS:
         return
-
+        
     channel = await bot.fetch_channel(payload.channel_id)
 
     message = await channel.fetch_message(payload.message_id)
+    
+    guild = await bot.fetch_guild(payload.guild_id)
+    member = await guild.fetch_member(payload.user_id)
 
-    user = payload.member or await bot.fetch_user(payload.user_id)
+    name = member.display_name 
 
     if not message.content and not message.attachments:
         return
@@ -39,7 +42,7 @@ async def on_raw_reaction_add(payload):
     files = [await a.to_file() for a in message.attachments] if message.attachments else []
 
     await channel.send(
-        content=f"💬 **{user.name}**:\n{message.content}",
+        content=f"💬 **{name}**:\n{message.content}",
         files=files,
         allowed_mentions=discord.AllowedMentions.none()
     )
