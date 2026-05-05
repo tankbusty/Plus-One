@@ -15,6 +15,8 @@ COPY_EMOJI_IDS = {
     935551452850577408,
 }
 
+recent = set()
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
@@ -26,15 +28,23 @@ async def on_raw_reaction_add(payload):
 
     if payload.emoji.id not in COPY_EMOJI_IDS:
         return
-        
-    channel = await bot.fetch_channel(payload.channel_id)
 
+    # 🛑 duplicate protection
+    key = (payload.message_id, payload.user_id, payload.emoji.id)
+    if key in recent:
+        return
+    recent.add(key)
+
+    if len(recent) > 1000:
+        recent.clear()
+
+    channel = await bot.fetch_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
-    
+
     guild = await bot.fetch_guild(payload.guild_id)
     member = await guild.fetch_member(payload.user_id)
 
-    name = member.display_name 
+    name = member.display_name
 
     if not message.content and not message.attachments:
         return
