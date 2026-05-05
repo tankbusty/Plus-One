@@ -1,0 +1,6 @@
+services:
+  - type: worker
+    name: discord-bot
+    env: python
+    startCommand: python bot.py
+    buildCommand: pip install -r requirements.txt
